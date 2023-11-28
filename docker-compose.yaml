@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  fastapi:
+    container_name: rest-api
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: base
+    restart: always
+    tty: true
+    volumes:
+      - ./backend/fast_api:/app
+      - ~/.zshrc:/root/.zshrc
+    ports:
+      - "5000:5000"
+    command: ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "5000", "--access-log"]
+    expose:
+      - "5000"
+
+  grpc-api:
+    container_name: grpc-api
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: base
+    restart: always
+    tty: true
+    volumes:
+      - ./backend/grpc_api/src:/app
+      - ~/.zshrc:/root/.zshrc
+    ports:
+      - "50051:50051"
+    command: ["python", "main.py"]
+    expose:
+      - "50051"
