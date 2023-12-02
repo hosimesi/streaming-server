@@ -1,5 +1,3 @@
-import asyncio
-
 from fastapi import APIRouter, WebSocket
 from fastapi.responses import StreamingResponse
 from schemas.chat import ChatRequest

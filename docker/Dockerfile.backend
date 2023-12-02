@@ -18,7 +18,7 @@ FROM base as rest
 COPY backend/fast_api ./
 EXPOSE 5000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000", "--access-log"]
+CMD ["gunicorn", "main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:5000", "--timeout", "300", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "debug"]
 
 FROM base as grpc
 

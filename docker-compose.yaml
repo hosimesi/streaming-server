@@ -5,7 +5,7 @@ services:
     container_name: rest-api
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.backend
       target: base
     restart: always
     tty: true
@@ -14,7 +14,7 @@ services:
       - ~/.zshrc:/root/.zshrc
     ports:
       - "5000:5000"
-    command: ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "5000", "--access-log"]
+    command: ["gunicorn", "main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:5000", "--timeout", "300", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "debug"]
     expose:
       - "5000"
 
@@ -22,7 +22,7 @@ services:
     container_name: grpc-api
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.backend
       target: base
     restart: always
     tty: true
@@ -34,3 +34,19 @@ services:
     command: ["python", "main.py"]
     expose:
       - "50051"
+
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+      target: base
+    restart: always
+    tty: true
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    command: ["yarn", "start"]
+    expose:
+      - "3000"
