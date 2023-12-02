@@ -1,0 +1,118 @@
+# frontend用のDeployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: $(frontend-image.image)
+        ports:
+        - containerPort: 3000
+        env:
+          - name: REACT_APP_REST_API_URL
+            value: "http://rest-service:5000"
+          - name: REACT_APP_GRPC_API_URL
+            value: "http://grpc-service:9000"
+---
+# rest用のDeployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest
+  labels:
+    app: rest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rest
+  template:
+    metadata:
+      labels:
+        app: rest
+    spec:
+      containers:
+      - name: rest
+        image: $(rest-image.image)
+        ports:
+        - containerPort: 5000
+      readinessProbe:
+        httpGet:
+          port: 5000
+          path: /
+        initialDelaySeconds: 30
+        periodSeconds: 15
+      livenessProbe:
+        httpGet:
+          port: 5000
+          path: /
+        initialDelaySeconds: 30
+        periodSeconds: 15
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 500m
+          memory: 1024Mi
+---
+# grpc用のDeployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc
+  labels:
+    app: grpc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc
+  template:
+    metadata:
+      labels:
+        app: grpc
+    spec:
+      containers:
+      - name: grpc
+        image: $(grpc-image.image)
+        ports:
+        - containerPort: 50051
+---
+# grpc-web用のenvoy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-web-envoy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-web-envoy
+  template:
+    metadata:
+      labels:
+        app: grpc-web-envoy
+    spec:
+      containers:
+      - name: envoy
+        image: envoyproxy/envoy:v1.28-latest
+        ports:
+        - containerPort: 9000
+        volumeMounts:
+        - name: envoy-config
+          mountPath: /etc/envoy
+      volumes:
+      - name: envoy-config
+        configMap:
+          name: envoy-config

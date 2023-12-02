@@ -50,3 +50,21 @@ services:
     command: ["yarn", "start"]
     expose:
       - "3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+      - REACT_APP_GRPC_API_URL=http://localhost:50051
+
+  # リバースプロキシ
+  envoy:
+    image: envoyproxy/envoy:v1.28-latest
+    container_name: envoy-grpc-proxy
+    ports:
+      - 9000:9000
+    volumes:
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
