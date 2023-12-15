@@ -25,7 +25,7 @@ When you send a chat, the LLM will automatically reply to you.
 
 
 # System Architecture
-TBU
+![システムアーキテクチャ](image/image.png)
 
 
 # How to run in local
