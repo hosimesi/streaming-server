@@ -10,8 +10,9 @@ COPY ./frontend ./
 
 CMD ["yarn", "start"]
 
-FROM base as dev
+FROM base as prod
 
+ENV SYSTEM_ENV=production
 RUN yarn install --production=true
 
 RUN yarn build

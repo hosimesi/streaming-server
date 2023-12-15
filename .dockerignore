@@ -28,3 +28,9 @@ tox.ini
 # README files
 README.md
 
+# environment files
+*.env
+
+
+*node_modules/
+

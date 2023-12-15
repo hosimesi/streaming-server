@@ -32,14 +32,14 @@ TBU
 ## Set the secrets
 ### fast_api
 
-```
+```sh
 $ cd path/to/fast_api
 $ vim .env
 ```
 
 You must set OPEN AI SECRET KEY.
 
-```
+```sh
 OPENAI_API_VERSION=xxxxx
 OPENAI_API_BASE=xxxxx
 OPENAI_API_KEY=xxxxx
@@ -55,7 +55,7 @@ $ vim .env
 
 You must set OPEN AI SECRET KEY.
 
-```
+```sh
 OPENAI_API_VERSION=xxxxx
 OPENAI_API_BASE=xxxxx
 OPENAI_API_KEY=xxxxx
@@ -64,14 +64,14 @@ OPENAI_CHAT_ENGINE=xxxxx
 
 ### frontend
 
-```
+```sh
 $ cd path/to/frontend
 $ vim .env
 ```
 
 You must set URI.
 
-```
+```sh
 REACT_APP_REST_API_URL=http://localhost:5000
 REACT_APP_GRPC_API_URL=http://localhost:9000
 
@@ -86,5 +86,30 @@ $ docker compose up --build -d
 ```
 
 # How to Deploy
-TBU
+1. Create .env files.
+```sh
+# .env
+OPENAI_API_VERSION=xxxxx
+OPENAI_API_BASE=xxxxx
+OPENAI_API_KEY=xxxxx
+OPENAI_CHAT_ENGINE=xxxxx
+```
 
+2. Set k8s secrets.
+```sh
+kubectl create secret generic --save-config openai-secret --from-env-file .env
+```
+
+3. Upload to Artifact Registry.
+```Makefile
+gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+docker build -t $(ARTIFACT_REPOSITORY)/$(PROJECT_ID)/$(REPOSITORY_NAME)/$(API_IMAGE_NAME):$(SHORT_SHA) -f $(DOCKERFILE_REPOSITORY)/$(DOCKERFILE_API) .
+docker push $(ARTIFACT_REPOSITORY)/$(PROJECT_ID)/$(REPOSITORY_NAME)/$(API_IMAGE_NAME):$(SHORT_SHA)
+```
+
+4. deploy to GKE.
+```Makefile
+gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+docker build -t $(ARTIFACT_REPOSITORY)/$(PROJECT_ID)/$(REPOSITORY_NAME)/$(API_IMAGE_NAME):$(SHORT_SHA) -f $(DOCKERFILE_REPOSITORY)/$(DOCKERFILE_API) .
+docker push $(ARTIFACT_REPOSITORY)/$(PROJECT_ID)/$(REPOSITORY_NAME)/$(API_IMAGE_NAME):$(SHORT_SHA)
+```

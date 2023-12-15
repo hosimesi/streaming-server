@@ -1,4 +1,3 @@
-# frontend用のDeployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,18 +12,28 @@ spec:
       labels:
         app: frontend
     spec:
+      dnsConfig:
+        nameservers:
+          - 10.96.0.10
+        options:
+          - name: ndots
+            value: "5"
+      dnsPolicy: None
       containers:
       - name: frontend
-        image: $(frontend-image.image)
+        image: <your/frontend/image/uri>
         ports:
         - containerPort: 3000
         env:
           - name: REACT_APP_REST_API_URL
-            value: "http://rest-service:5000"
+            value: "<your/public/ip>/api/"
           - name: REACT_APP_GRPC_API_URL
-            value: "http://grpc-service:9000"
+            value: "<your/public/ip>/grpc/"
+      - name: nginx
+        image: <your/nginx/image/uri>
+        ports:
+        - containerPort: 80
 ---
-# rest用のDeployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -43,30 +52,31 @@ spec:
     spec:
       containers:
       - name: rest
-        image: $(rest-image.image)
+        image: <your/rest/image/uri>
         ports:
         - containerPort: 5000
-      readinessProbe:
-        httpGet:
-          port: 5000
-          path: /
-        initialDelaySeconds: 30
-        periodSeconds: 15
-      livenessProbe:
-        httpGet:
-          port: 5000
-          path: /
-        initialDelaySeconds: 30
-        periodSeconds: 15
-      resources:
-        requests:
-          cpu: 100m
-          memory: 512Mi
-        limits:
-          cpu: 500m
-          memory: 1024Mi
+        env:
+          - name: OPENAI_API_BASE
+            valueFrom:
+              secretKeyRef:
+                name: openai-secret
+                key: OPENAI_API_BASE
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: openai-secret
+                key: OPENAI_API_KEY
+          - name: OPENAI_API_VERSION
+            valueFrom:
+              secretKeyRef:
+                name: openai-secret
+                key: OPENAI_API_VERSION
+          - name: OPENAI_CHAT_ENGINE
+            valueFrom:
+              secretKeyRef:
+                name: openai-secret
+                key: OPENAI_CHAT_ENGINE
 ---
-# grpc用のDeployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -85,11 +95,31 @@ spec:
     spec:
       containers:
       - name: grpc
-        image: $(grpc-image.image)
+        image: <your/grpc/image/uri>
         ports:
         - containerPort: 50051
+        env:
+          - name: OPENAI_API_BASE
+            valueFrom:
+              secretKeyRef:
+                name: openai-secret
+                key: OPENAI_API_BASE
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: openai-secret
+                key: OPENAI_API_KEY
+          - name: OPENAI_API_VERSION
+            valueFrom:
+              secretKeyRef:
+                name: openai-secret
+                key: OPENAI_API_VERSION
+          - name: OPENAI_CHAT_ENGINE
+            valueFrom:
+              secretKeyRef:
+                name: openai-secret
+                key: OPENAI_CHAT_ENGINE
 ---
-# grpc-web用のenvoy
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -105,8 +135,8 @@ spec:
         app: grpc-web-envoy
     spec:
       containers:
-      - name: envoy
-        image: envoyproxy/envoy:v1.28-latest
+      - name: grpc-web-envoy
+        image: <your/envoy/image/uri>
         ports:
         - containerPort: 9000
         volumeMounts:

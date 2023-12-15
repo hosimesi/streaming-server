@@ -11,13 +11,13 @@ router = APIRouter(
 )
 
 
-@router.post("/streaming/fastapi")
+@router.post("/streaming/fastapi/")
 async def fastapi(chat_request: ChatRequest):
     service = OpenAIService()
-    return StreamingResponse(service.get_chat_streaming_response(chat_request))
+    return StreamingResponse(service.get_chat_streaming_response(chat_request), media_type="text/event-stream")
 
 
-@router.post("/streaming/starlette")
+@router.post("/streaming/starlette/")
 async def stream(chat_request: ChatRequest):
     service = OpenAIService()
     return EventSourceResponse(service.get_chat_event_source_response(chat_request))

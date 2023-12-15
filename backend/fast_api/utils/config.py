@@ -1,5 +1,3 @@
-import os
-
 from pydantic_settings import BaseSettings
 
 
@@ -11,13 +9,3 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        # env_file = "../.env"
-        # @property
-        # def _env_file(self):
-        #     if os.path.exists(".env"):
-        #         return ".env"
-        #     else:
-        #         self.OPENAI_API_VERSION = os.environ.get("OPENAI_API_VERSION")
-        #         self.OPENAI_API_BASE = os.environ.get("OPENAI_API_BASE")
-        #         self.OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-        #         self.OPENAI_CHAT_ENGINE = os.environ.get("OPENAI_CHAT_ENGINE")
